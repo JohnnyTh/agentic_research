@@ -19,8 +19,9 @@ just the files in this repo, with no prior conversation context.
 - `AGENT_ENTRYPOINT.md` — the map: what the research is, the four stages
   (define → run & explore → thesis formulation → report), the rules, and
   where things live.
-- `RESEARCH_LOG.md` / `RESEARCH_SUMMARY.md` — append-only session history,
-  full detail and headline-bullet index respectively.
+- `RESEARCH_LOG.md` — append-only index (date + title) into `research_log/`,
+  where full session detail actually lives, one file per session.
+- `RESEARCH_SUMMARY.md` — append-only headline-bullet digest of the log.
 - `RESEARCH_PLAN.md` — forward-looking, priority-tagged open questions.
 - `experiments/` + `experiment_results/` — one numbered, standalone script
   per investigation step, each writing structured output to its own result

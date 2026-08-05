@@ -7,9 +7,12 @@ file is a map, not a summary of findings — for that, read in this order:
 
 1. `RESEARCH_SUMMARY.md` — quick-scan bullet headlines per session, read
    this first for "what do we know so far."
-2. `RESEARCH_LOG.md` — full detail behind every summary bullet (methodology,
-   full reasoning, every gotcha hit); read a specific entry when a past
-   finding needs verifying or you need more than the headline.
+2. `RESEARCH_LOG.md` — index (date + title, one line each) into `research_log/`,
+   where the full detail behind every summary bullet actually lives, one
+   file per session (methodology, full reasoning, every gotcha hit). Read
+   the index to find the entry, then open only that file — don't read the
+   whole `research_log/` directory, it's split precisely so agents don't
+   have to.
 3. `RESEARCH_PLAN.md` — open ideas to explore next, by priority; check it
    before starting new work and add to it (don't just leave ideas in log
    entries) whenever a session surfaces something worth investigating later.
@@ -66,21 +69,30 @@ to defining a new experiment) — the order is a loop, not a one-way gate.
    if used at all, are for human ad hoc exploration ONLY — never cite a
    notebook run as a finding, and any verification step must also be a
    script.
-2. **Log every session in `RESEARCH_LOG.md`, and summarize it in
-   `RESEARCH_SUMMARY.md` in the same sitting.** Both are append-only. The log
-   entry: what was run, what was found (headline numbers — point to the
-   result dir for full tables), what it implies, what's open/next. The
-   matching summary section: 3-5 bullets, headline `Found`/`Implies` facts
-   only, no methodology or open/next, ending with a link back to the log
-   entry's anchor. If a later session contradicts an earlier finding, add a
-   new entry (and summary section) saying so — don't edit history in either
-   file.
+2. **Log every session as a new file in `research_log/`, add its row to
+   `RESEARCH_LOG.md`'s index table, and summarize it in `RESEARCH_SUMMARY.md`
+   in the same sitting.** All append-only. The log entry (its own
+   `research_log/NNN-slug.md`, next number, `## YYYY-MM-DD — title` header):
+   what was run, what was found (headline numbers — point to the result dir
+   for full tables), what it implies, what's open/next. Add one
+   `| date | [title](research_log/NNN-slug.md) |` row to `RESEARCH_LOG.md`
+   for it. The matching summary section: 3-5 bullets, headline
+   `Found`/`Implies` facts only, no methodology or open/next, ending with a
+   link to the log file. If a later session contradicts an earlier finding,
+   add a new entry (new file + index row + summary section) saying so —
+   don't edit history in any of these.
 3. **Reports are numbered scripts too, under `reports/`, output to
    `report_results/NN_name/`.** Same reproducibility bar as `experiments/`:
    re-running a report script regenerates the report from current experiment
    output, it isn't hand-edited after the fact. A report script may re-read
    `experiment_results/` CSVs/JSON directly rather than recomputing anything.
-4. **Verify data provenance before trusting a comparison.** Before comparing
+4. **Long-running scripts must write progress somewhere the user can tail
+   live.** Anything that can take a while (data pulls, batch inference,
+   full-dataset sweeps) should stream progress (item counts, current
+   file/id, timestamps) to a log file under `experiment_results/NN_name/` as
+   it runs, not just print a final summary — the user otherwise has no way
+   to tell a slow script from a hung one.
+5. **Verify data provenance before trusting a comparison.** Before comparing
    two supposedly-distinct sources (two model versions, two time periods,
    two datasets), add a cheap sanity check (hash comparison, row-count
    check, spot-check) that would catch the two actually being the same data
@@ -99,7 +111,9 @@ whole subsection if none apply yet.}}
 {{RESEARCH_DIR_NAME}}/
 ├── AGENT_ENTRYPOINT.md          <- you are here
 ├── RESEARCH_SUMMARY.md          <- bullet-point headlines per session, read next
-├── RESEARCH_LOG.md              <- full session-by-session history, read for detail
+├── RESEARCH_LOG.md              <- index (date + title) into research_log/, read this to find an entry
+├── research_log/
+│   └── NNN-slug.md               <- one file per session, full detail
 ├── RESEARCH_PLAN.md             <- open ideas to explore, by priority
 ├── experiments/
 │   ├── common.py                <- shared paths, disk-cached lookups, etc.

@@ -38,6 +38,6 @@ answers, and skip a question if the user already answered it unprompted.
    fresh-session agent seeing it present would wrongly think init is still
    pending. Also delete the `<!-- INIT_RESEARCH.md not run yet? -->` comment
    near the top of `AGENT_ENTRYPOINT.md`.
-4. Leave `RESEARCH_LOG.md`, `RESEARCH_SUMMARY.md`, `experiment_results/`, and
-   `report_results/` untouched (empty) — the first real session populates
-   them.
+4. Leave `RESEARCH_LOG.md`, `RESEARCH_SUMMARY.md`, `research_log/`,
+   `experiment_results/`, and `report_results/` untouched (empty) — the
+   first real session populates them.
