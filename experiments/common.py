@@ -7,6 +7,9 @@ under its own subdirectory. No notebook state, no manual cell ordering.
 Grow this file with real domain helpers as the research needs them (data
 loaders, shared constants) — the disk-cache example below is illustrative,
 not a framework to force every lookup through.
+
+experiments/NN_*.py scripts must not import each other directly — promote
+shared logic here first (see research_rules/04-no-cross-import.md).
 """
 
 import json

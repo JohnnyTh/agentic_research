@@ -1,10 +1,14 @@
 # {{RESEARCH_NAME}} — log index
 
 Index into `research_log/`, one row per session, in chronological order.
-Append-only — if a finding is later contradicted or refined, add a new row
-+ file that says so; don't edit history. Open the linked file for full
-detail (methodology, reasoning, gotchas) — don't read the whole
-`research_log/` directory to check one entry.
+The table below is the *only* per-entry summary — its headline column must
+be specific enough that a future session can judge relevance without
+opening the file; see the headline standard in `AGENT_ENTRYPOINT.md` before
+adding a row. Append-only — if a finding is later contradicted or refined,
+add a new row/file that says so; don't edit history.
+
+Entries are written, and rows added, only at a checkpoint the human
+selects — see the write-approval gate in `AGENT_ENTRYPOINT.md`.
 
 Each `research_log/NNN-slug.md` file uses this format:
 - **Date / session**
@@ -16,8 +20,8 @@ Each `research_log/NNN-slug.md` file uses this format:
 - **Open / next**: what's unresolved or queued (mirror into `RESEARCH_PLAN.md`
   too — don't leave ideas stranded only here)
 
-| Date | Entry |
-|------|-------|
-<!-- | YYYY-MM-DD | [title](research_log/001-slug.md) | -->
+| Date | Entry | Headline |
+|---|---|---|
+<!-- | YYYY-MM-DD | [title](research_log/001-slug.md) | one-clause result | -->
 
 <!-- First real entry goes here. Delete this comment once added. -->

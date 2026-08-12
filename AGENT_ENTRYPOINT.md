@@ -1,24 +1,14 @@
 # {{RESEARCH_NAME}} — agent entrypoint
 
 Read this first if you're picking up this research in a new conversation.
-It orients you: what this research is, the stages it moves through, the
-rules to follow, where everything lives, and what's open right now. This
-file is a map, not a summary of findings — for that, read in this order:
-
-1. `RESEARCH_SUMMARY.md` — quick-scan bullet headlines per session, read
-   this first for "what do we know so far."
-2. `RESEARCH_LOG.md` — index (date + title, one line each) into `research_log/`,
-   where the full detail behind every summary bullet actually lives, one
-   file per session (methodology, full reasoning, every gotcha hit). Read
-   the index to find the entry, then open only that file — don't read the
-   whole `research_log/` directory, it's split precisely so agents don't
-   have to.
-3. `RESEARCH_PLAN.md` — open ideas to explore next, by priority; check it
-   before starting new work and add to it (don't just leave ideas in log
-   entries) whenever a session surfaces something worth investigating later.
-4. `report_results/` — synthesized, human-facing writeups (see "Stage 4:
-   Report" below). Read an existing report before writing a new one that
-   covers similar ground — extend or supersede it, don't duplicate it.
+It's a map and a rule index, not a summary of findings — for findings, read
+`RESEARCH_LOG.md`'s index table, then open only the `research_log/NNN.md`
+files relevant to your current question (don't read the whole
+`research_log/` directory — it's split precisely so you don't have to).
+Check `RESEARCH_PLAN.md`'s index table for queued/open ideas before starting
+new work — like the log, it's split so full item detail lives one-per-file
+in `research_plan_items/` (don't read the whole directory, only the files
+relevant to your question).
 
 <!-- INIT_RESEARCH.md not run yet? Do that first — it turns this file from a
      template into a real entrypoint. Delete this comment once it has been. -->
@@ -40,81 +30,134 @@ to defining a new experiment) — the order is a loop, not a one-way gate.
 
 1. **Define** — turn an open question (from `RESEARCH_PLAN.md`, or a new one
    surfaced this session) into a concrete, runnable experiment: what's being
-   measured, against what data, with what success signal. Write the plan
-   entry before writing code if the experiment is non-trivial.
+   measured, against what data, with what success signal.
 2. **Run & explore** — implement and run the experiment as a numbered script
    under `experiments/`, inspect its output, iterate until the result is
-   trustworthy (see the provenance/sanity-check rule below).
+   trustworthy. Do this via a dispatched subagent, not inline — see
+   "Delegate experiment iteration to a subagent" below.
 3. **Thesis formulation** — once one or more experiments produce results,
    step back and state what they imply for the research goal: a short,
    falsifiable claim ("X causes Y", "model A beats model B on Z"), grounded
-   in specific experiment output, not vibes. A thesis can draw on multiple
-   experiments. Record it as a `RESEARCH_SUMMARY.md` entry's "Implies" line
-   at minimum; promote it to a full report (stage 4) once it's substantial
-   or decision-relevant enough that someone outside this research would want
-   to read it standalone.
-4. **Report** — write a self-contained, human-facing synthesis of one or more
-   theses as a numbered script under `reports/` (see "Reports" below),
+   in specific experiment output, not vibes.
+4. **Report** — write a self-contained, human-facing synthesis of one or
+   more theses as a numbered script under `reports/` (e.g. `01_report.py`),
    modeled on prior reports in `report_results/` if any exist. A report is a
-   deliverable, not a lab notebook: it should read coherently to someone who
-   hasn't followed the session-by-session log.
+   deliverable, not a lab notebook — it should read coherently to someone
+   who hasn't followed the session-by-session log.
 
-## Rules — read before writing any code
+## Writes to `RESEARCH_LOG.md` / `research_log/` / `RESEARCH_PLAN.md` need a human go-ahead
 
-1. **Scripts, not notebooks, for anything that's a result.** Every real
-   investigation step is a standalone Python script under `experiments/`,
-   numbered in the order it was built (`01_...py`, `02_...py`, ...). Each
-   script is self-contained, runnable on its own, and writes structured
-   output (CSV/JSON/HTML plots) to `experiment_results/NN_name/`. Notebooks,
-   if used at all, are for human ad hoc exploration ONLY — never cite a
-   notebook run as a finding, and any verification step must also be a
-   script.
-2. **Log every session as a new file in `research_log/`, add its row to
-   `RESEARCH_LOG.md`'s index table, and summarize it in `RESEARCH_SUMMARY.md`
-   in the same sitting.** All append-only. The log entry (its own
-   `research_log/NNN-slug.md`, next number, `## YYYY-MM-DD — title` header):
-   what was run, what was found (headline numbers — point to the result dir
-   for full tables), what it implies, what's open/next. Add one
-   `| date | [title](research_log/NNN-slug.md) |` row to `RESEARCH_LOG.md`
-   for it. The matching summary section: 3-5 bullets, headline
-   `Found`/`Implies` facts only, no methodology or open/next, ending with a
-   link to the log file. If a later session contradicts an earlier finding,
-   add a new entry (new file + index row + summary section) saying so —
-   don't edit history in any of these.
-3. **Reports are numbered scripts too, under `reports/`, output to
-   `report_results/NN_name/`.** Same reproducibility bar as `experiments/`:
-   re-running a report script regenerates the report from current experiment
-   output, it isn't hand-edited after the fact. A report script may re-read
-   `experiment_results/` CSVs/JSON directly rather than recomputing anything.
-4. **Long-running scripts must write progress somewhere the user can tail
-   live.** Anything that can take a while (data pulls, batch inference,
-   full-dataset sweeps) should stream progress (item counts, current
-   file/id, timestamps) to a log file under `experiment_results/NN_name/` as
-   it runs, not just print a final summary — the user otherwise has no way
-   to tell a slow script from a hung one.
-5. **Verify data provenance before trusting a comparison.** Before comparing
-   two supposedly-distinct sources (two model versions, two time periods,
-   two datasets), add a cheap sanity check (hash comparison, row-count
-   check, spot-check) that would catch the two actually being the same data
-   — this class of bug is easy to hit and easy to miss silently.
+**Don't write a log entry or edit `RESEARCH_PLAN.md` just because a stage
+finished.** These are checkpoints the human chooses, not an automatic
+side-effect of running an experiment:
 
-### Domain-specific rules
+- After a subagent's stage-2 report comes back, or you've formed a thesis,
+  *propose* the log entry / plan addition in your reply — don't write the
+  file yet. Wait for the human to say "log it" / "add it to the plan" (or
+  otherwise clearly sign off) before writing.
+- Exception: the human can pre-authorize a batch ("log everything from this
+  session at the end") — follow what was actually asked, not the default.
+- This applies to `RESEARCH_PLAN.md` edits too: propose the candidate line,
+  don't add it unqueued. An idea worth remembering but not yet approved can
+  be held in your reply, not the file — it isn't lost, it just isn't
+  written until asked for.
 
-{{Add rules specific to this research's domain here — e.g. data-access
-constraints, a cache/lookup gotcha, a known-bad data source to avoid. Delete
-this placeholder line once at least one real rule is added, or delete the
-whole subsection if none apply yet.}}
+Once approved, the mechanics are unchanged: one file per session under
+`research_log/`, next number, `## YYYY-MM-DD — title` header; add a row to
+`RESEARCH_LOG.md`'s index (see headline standard below); append-only — if a
+later session contradicts an earlier finding, add a new entry saying so,
+don't edit history.
+
+### Headline standard for `RESEARCH_LOG.md`'s index
+
+There's no separate summary file — the index table's headline column is the
+*only* per-entry summary that exists, so it has to let a future session
+judge relevance without opening the full file. A vague headline defeats the
+entire point of the split:
+
+- **Name the subject and the result, not the activity.** Bad: "tried a new
+  clustering approach." Good: "colour-split clustering drops agreement
+  88.8%→68.5%." It must contain the number or verdict that makes this entry
+  distinguishable from other entries on a related topic — not something
+  equally true of half the log ("ran experiment NN", "investigated X").
+- **Include the entity/metric a future search would grep for** — a
+  category name, script number, metric name — whatever term someone
+  scanning for "anything about accuracy" or "anything about category X"
+  would type.
+- **State corrections as corrections, explicitly** — if this entry reverses
+  or narrows an earlier one, the headline says "correction: ...".
+- **One line, one clause.** Two unrelated findings from one session get two
+  index rows pointing at the same file, not one compound headline that
+  hides the second finding from a search matching only the first clause.
+
+## Delegate experiment iteration to a subagent
+
+Stage 2 is where a session's context balloons: write script, run, inspect
+output, fix a bug or tweak the approach, run again — often several rounds
+per experiment. None of that iteration is worth keeping in the master
+session's context once the script is trustworthy — only the final numbers
+and interpretation get cited going forward. So:
+
+1. **Default: stage 2 runs in a dispatched subagent, not inline.** Once an
+   experiment is defined (stage 1 has produced a concrete script name, what's
+   measured, what success looks like), dispatch a subagent to implement, run,
+   debug, and iterate on it, rather than doing that work in the master
+   session. Only skip dispatch for a script you're confident needs zero
+   iteration.
+2. **Dispatch prompt should point the subagent at:** the specific rule
+   files it needs from `research_rules/` (below — pick by what the
+   experiment actually does, don't just say "read research_rules/"), the
+   experiment number/name to use, the concrete question/success signal from
+   stage 1, and any prior scripts to reuse code from (e.g.
+   `experiments/common.py`, or "reuse NN's indices like MM did from NN").
+   The subagent should iterate internally until the script runs cleanly and
+   the result looks trustworthy — that back-and-forth stays in its own
+   context, never the master's.
+3. **The subagent returns a short structured report, not a transcript:**
+   script path + result dir written; the headline finding; any gotcha worth
+   flagging (provenance risk, skipped/unresolvable-item counts, data-scope
+   caveats); and open questions it hit but didn't resolve (candidates to
+   propose for `RESEARCH_PLAN.md` — still needs human sign-off per the gate
+   above). The master session doesn't need intermediate runs, stack traces,
+   or fix history.
+4. **After dispatch, the master session's job** is to hold the dispatch spec
+   and report, propose the log/plan writes (per the gate above), and decide
+   the next experiment — not to carry scripts, stdout, or fix history.
+5. **More than one experiment queued → dispatch subagents in parallel**, not
+   inline serially.
+
+## Rules — read only the ones your current task triggers
+
+Each rule lives in its own file under `research_rules/` so you only pay for
+what you need this session — don't read the whole directory.
+
+| Rule | Trigger | File |
+|---|---|---|
+| Scripts, not notebooks | writing/citing any finding | `research_rules/01-scripts-not-notebooks.md` |
+| Progress logging | script may take a while (batch/sweep) | `research_rules/02-progress-logging.md` |
+| Verify provenance | comparing two data sources | `research_rules/03-verify-provenance.md` |
+| No cross-import | experiment script needs another's logic | `research_rules/04-no-cross-import.md` |
+| Directory layout + data paths | orienting, or locating a script/dir | `research_rules/05-directory-layout.md` |
+
+Add domain-specific rule files here as they come up (a data-access
+constraint, a cache/lookup gotcha, a known-bad source — from
+`INIT_RESEARCH.md`'s "domain gotchas" question or surfaced later), numbered
+to continue the sequence above, and add a row to this table pointing at
+each one.
 
 ## Where things live
 
 ```
 {{RESEARCH_DIR_NAME}}/
 ├── AGENT_ENTRYPOINT.md          <- you are here
-├── RESEARCH_SUMMARY.md          <- bullet-point headlines per session, read next
-├── RESEARCH_LOG.md              <- index (date + title) into research_log/, read this to find an entry
+├── RESEARCH_LOG.md              <- index (date + title + headline) into research_log/
 ├── research_log/
 │   └── NNN-slug.md               <- one file per session, full detail
-├── RESEARCH_PLAN.md             <- open ideas to explore, by priority
+├── RESEARCH_PLAN.md             <- index (status + priority + headline) into research_plan_items/
+├── research_plan_items/
+│   └── NNN-slug.md                <- one file per open item, full detail
+├── research_rules/
+│   └── NN-name.md                <- one operational rule per file, read on demand
 ├── experiments/
 │   ├── common.py                <- shared paths, disk-cached lookups, etc.
 │   ├── 01_....py                 <- one file per experiment, numbered in build order
@@ -134,8 +177,7 @@ obtained; note any access constraints}}.
 ## Current state (as of {{DATE}} — check RESEARCH_LOG.md for anything newer)
 
 {{Leave empty until the first session produces findings. Once populated,
-keep this section to a few headline bullets — same bar as a
-RESEARCH_SUMMARY.md entry — and update it each session so a fresh agent
-gets the current picture without reading the whole log.}}
+keep this section to a few headline bullets and update it each session so a
+fresh agent gets the current picture without reading the whole log.}}
 
 See `RESEARCH_PLAN.md` for open threads and what's queued next.
