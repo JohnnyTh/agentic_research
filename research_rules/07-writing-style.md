@@ -15,6 +15,10 @@ document for specialists, not a paper. Favor clarity over completeness.
   a next step becomes two or three bullets, or a short sub-list.
 - **Plain words over formal ones**: "shows" not "demonstrates," "found" not
   "identified," "use" not "utilize," "about" not "approximately."
+- **Cut filler and throat-clearing.** Drop words that add no information:
+  "in order to" → "to", "it is worth noting that" → delete, "the fact
+  that" → "that", "due to the fact that" → "because". If deleting a word
+  or phrase changes nothing about what the reader learns, delete it.
 - **Keep every number, citation, and caveat.** This rule cuts grammar, not
   content — don't drop a real uncertainty or a real number to make a
   sentence shorter; give it its own sentence instead.
