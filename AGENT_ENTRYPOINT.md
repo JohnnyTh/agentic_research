@@ -45,6 +45,16 @@ to defining a new experiment) — the order is a loop, not a one-way gate.
    deliverable, not a lab notebook — it should read coherently to someone
    who hasn't followed the session-by-session log.
 
+   Stats computation, HTML formatting/rendering, and report prose/wording
+   must live in separate files under a `reports/NN_name/` package
+   (`compute.py`, `render.py`) — never inline together in the orchestrator
+   script. This is a requirement, not a suggestion: see
+   `research_rules/06-report-separation.md`. If the report needs its own
+   data-collection/preprocessing beyond reusing an `experiments/` script's
+   output, that lives in `reports/NN_name/collect.py`, checked in alongside
+   the report and written to be re-run — not a one-off throwaway, and not
+   hardcoded to today's data paths/shape (see the same rule file for why).
+
 ## Writes to `RESEARCH_LOG.md` / `research_log/` / `RESEARCH_PLAN.md` need a human go-ahead
 
 **Don't write a log entry or edit `RESEARCH_PLAN.md` just because a stage
@@ -138,6 +148,7 @@ what you need this session — don't read the whole directory.
 | Verify provenance | comparing two data sources | `research_rules/03-verify-provenance.md` |
 | No cross-import | experiment script needs another's logic | `research_rules/04-no-cross-import.md` |
 | Directory layout + data paths | orienting, or locating a script/dir | `research_rules/05-directory-layout.md` |
+| Report separation | writing/editing a report script | `research_rules/06-report-separation.md` |
 
 Add domain-specific rule files here as they come up (a data-access
 constraint, a cache/lookup gotcha, a known-bad source — from
@@ -165,7 +176,12 @@ each one.
 ├── experiment_results/
 │   └── NN_script_name/          <- one dir per experiment script, its CSV/JSON/PNG/HTML output
 ├── reports/
-│   ├── 01_....py                 <- one file per report, numbered in build order
+│   ├── NN_name_report.py        <- thin orchestrator, one file per report, runnable
+│   ├── NN_name/
+│   │   ├── compute.py            <- stats computation only
+│   │   ├── render.py             <- HTML/formatting only, no computation
+│   │   └── collect.py            <- optional: data gathering/preprocessing,
+│   │                                re-runnable, tolerant of source drift
 │   └── ...
 └── report_results/
     └── NN_report_name/          <- one dir per report script, its rendered output
