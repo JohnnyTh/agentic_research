@@ -46,12 +46,12 @@ to defining a new experiment) — the order is a loop, not a one-way gate.
    who hasn't followed the session-by-session log.
 
    Stats computation, HTML formatting/rendering, and report prose/wording
-   must live in separate files under a `reports/NN_name/` package
+   must live in separate files under a `reports/report_components_NN_name/` package
    (`compute.py`, `render.py`) — never inline together in the orchestrator
    script. This is a requirement, not a suggestion: see
    `research_rules/06-report-separation.md`. If the report needs its own
    data-collection/preprocessing beyond reusing an `experiments/` script's
-   output, that lives in `reports/NN_name/collect.py`, checked in alongside
+   output, that lives in `reports/report_components_NN_name/collect.py`, checked in alongside
    the report and written to be re-run — not a one-off throwaway, and not
    hardcoded to today's data paths/shape (see the same rule file for why).
 
