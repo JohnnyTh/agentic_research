@@ -143,6 +143,7 @@ what you need this session — don't read the whole directory.
 
 | Rule | Trigger | File |
 |---|---|---|
+| Writing style | always — any prose you write this session | `research_rules/07-writing-style.md` |
 | Scripts, not notebooks | writing/citing any finding | `research_rules/01-scripts-not-notebooks.md` |
 | Progress logging | script may take a while (batch/sweep) | `research_rules/02-progress-logging.md` |
 | Verify provenance | comparing two data sources | `research_rules/03-verify-provenance.md` |
